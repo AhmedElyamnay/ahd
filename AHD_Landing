@@ -1,0 +1,1178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>American Health Dubai — Pediatric Care + One-Click Booking (Demo)</title>
+
+  <!-- SF Pro-like system stack -->
+  <style>
+    :root{
+      --bg0:#F7FBFF;
+      --bg1:#EAF7FF;
+      --mint:#BFF5E6;
+      --blue:#B6DBFF;
+      --ink:#0B1220;
+      --muted:#52627A;
+      --glass: rgba(255,255,255,.56);
+      --glass2: rgba(255,255,255,.34);
+      --stroke: rgba(12, 24, 48, .08);
+      --shadow: 0 18px 60px rgba(11,18,32,.12);
+      --shadow2: 0 10px 30px rgba(11,18,32,.10);
+      --r16: 16px;
+      --r22: 22px;
+      --r28: 28px;
+      --ease: cubic-bezier(.2,.8,.2,1);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, system-ui, sans-serif;
+      background:
+        radial-gradient(1200px 800px at 10% 10%, rgba(191,245,230,.75), transparent 55%),
+        radial-gradient(1100px 700px at 90% 15%, rgba(182,219,255,.70), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    /* subtle noise */
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E");
+      mix-blend-mode:soft-light;
+      opacity:.45;
+    }
+
+    /* mobile 9:16-ish stage */
+    .stage{
+      min-height:100svh;
+      display:flex;
+      justify-content:center;
+      padding:18px 14px 26px;
+    }
+    .shell{
+      width:min(420px, 100%);
+      border-radius:34px;
+      padding:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.10));
+      border:1px solid rgba(255,255,255,.55);
+      box-shadow: 0 30px 80px rgba(11,18,32,.16);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position:relative;
+      overflow:hidden;
+    }
+    .shell:after{
+      content:"";
+      position:absolute; inset:-1px;
+      background: radial-gradient(900px 380px at 30% 0%, rgba(255,255,255,.32), transparent 60%);
+      pointer-events:none;
+    }
+
+    /* Top bar */
+    .topbar{
+      position:sticky; top:0;
+      z-index:5;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      padding:10px 8px 12px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      min-width:0;
+    }
+    .logo{
+      width:38px; height:38px;
+      border-radius:14px;
+      background: linear-gradient(145deg, rgba(182,219,255,.95), rgba(191,245,230,.95));
+      box-shadow: var(--shadow2);
+      display:grid; place-items:center;
+      border:1px solid rgba(255,255,255,.65);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo:before{
+      content:"";
+      position:absolute; inset:-30%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+      transform: translateX(-60%) rotate(18deg);
+      animation: shimmer 3.2s var(--ease) infinite;
+      opacity:.9;
+    }
+    @keyframes shimmer{
+      0%{ transform: translateX(-60%) rotate(18deg); }
+      55%{ transform: translateX(120%) rotate(18deg); }
+      100%{ transform: translateX(120%) rotate(18deg); }
+    }
+
+    .brand h1{
+      font-size:14px; line-height:1.1;
+      margin:0;
+      letter-spacing:.2px;
+      font-weight:750;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:220px;
+    }
+    .brand span{
+      display:block;
+      margin-top:2px;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:600;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:9px 11px;
+      border-radius:999px;
+      background: var(--glass);
+      border:1px solid var(--stroke);
+      box-shadow: 0 10px 30px rgba(11,18,32,.08);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      font-size:12px;
+      font-weight:650;
+      color: var(--ink);
+      max-width: 44%;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .dot{
+      width:8px; height:8px; border-radius:99px;
+      background: #22C55E;
+      box-shadow: 0 0 0 6px rgba(34,197,94,.15);
+      flex:0 0 auto;
+    }
+
+    /* Nav */
+    .nav{
+      display:flex; gap:10px;
+      padding:0 8px 10px;
+      overflow:auto hidden;
+      scrollbar-width:none;
+    }
+    .nav::-webkit-scrollbar{ display:none; }
+    .tab{
+      flex:0 0 auto;
+      display:flex; align-items:center; gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 10px 25px rgba(11,18,32,.06);
+      font-size:12px;
+      font-weight:700;
+      color:#13223a;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .25s var(--ease), background .25s var(--ease);
+    }
+    .tab:hover{ transform: translateY(-1px); }
+    .tab.active{
+      background: linear-gradient(135deg, rgba(182,219,255,.62), rgba(191,245,230,.55));
+    }
+    .icon{
+      width:18px;height:18px; display:inline-block;
+    }
+
+    /* Content sections */
+    .section{
+      padding:10px 8px;
+    }
+    .card{
+      background: var(--glass);
+      border:1px solid var(--stroke);
+      border-radius: var(--r28);
+      box-shadow: var(--shadow);
+      padding:14px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position:relative;
+      overflow:hidden;
+    }
+    .card.shimmer{
+      transform: translateY(10px);
+      opacity:0;
+      transition: transform .7s var(--ease), opacity .7s var(--ease);
+    }
+    .card.shimmer.in{
+      transform: translateY(0);
+      opacity:1;
+    }
+    .card.shimmer:before{
+      content:"";
+      position:absolute; inset:-40%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+      transform: translateX(-70%) rotate(18deg);
+      opacity:.0;
+      pointer-events:none;
+    }
+    .card.shimmer.in:before{
+      opacity:.75;
+      animation: shimmerOnce 1.6s var(--ease) 1;
+    }
+    @keyframes shimmerOnce{
+      0%{ transform: translateX(-70%) rotate(18deg); }
+      100%{ transform: translateX(140%) rotate(18deg); }
+    }
+
+    .hero{
+      padding:18px 16px;
+      border-radius: 30px;
+      background:
+        radial-gradient(700px 250px at 30% 0%, rgba(191,245,230,.65), transparent 60%),
+        radial-gradient(700px 250px at 90% 30%, rgba(182,219,255,.65), transparent 60%),
+        rgba(255,255,255,.42);
+      border:1px solid rgba(255,255,255,.65);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero h2{
+      margin:0;
+      font-size:20px;
+      letter-spacing:.2px;
+      font-weight:820;
+    }
+    .hero p{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+      font-weight:600;
+    }
+    .hero .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 11px;
+      border-radius:999px;
+      background: rgba(255,255,255,.55);
+      border:1px solid var(--stroke);
+      box-shadow: 0 10px 25px rgba(11,18,32,.06);
+      font-size:12px;
+      font-weight:750;
+      color:#0f1a2f;
+    }
+    .chip small{ color:var(--muted); font-weight:750; }
+
+    /* Search */
+    .searchWrap{
+      margin-top:12px;
+      display:grid;
+      gap:10px;
+    }
+    .searchBox{
+      border-radius: 22px;
+      background: rgba(255,255,255,.62);
+      border:1px solid var(--stroke);
+      box-shadow: 0 14px 34px rgba(11,18,32,.10);
+      padding:10px 10px 10px 12px;
+      display:flex; align-items:center; gap:10px;
+      position:relative;
+    }
+    .searchBox input{
+      border:0;
+      outline:none;
+      background:transparent;
+      width:100%;
+      font-size:13px;
+      font-weight:700;
+      color:var(--ink);
+    }
+    .searchBox input::placeholder{ color:#7A8AA2; font-weight:650; }
+    .kbd{
+      font-size:11px;
+      font-weight:800;
+      color:#52627A;
+      padding:6px 8px;
+      border-radius:10px;
+      background: rgba(255,255,255,.6);
+      border:1px solid var(--stroke);
+      user-select:none;
+    }
+    .suggest{
+      position:absolute;
+      left:0; right:0;
+      top:calc(100% + 10px);
+      background: rgba(255,255,255,.72);
+      border:1px solid var(--stroke);
+      border-radius: 18px;
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      overflow:hidden;
+      display:none;
+      z-index:10;
+    }
+    .suggest.show{ display:block; }
+    .suggestItem{
+      padding:12px 12px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      cursor:pointer;
+      transition: background .2s var(--ease);
+    }
+    .suggestItem:hover{ background: rgba(182,219,255,.25); }
+    .suggestItem b{ font-size:12px; font-weight:850; }
+    .suggestItem span{ font-size:12px; color:var(--muted); font-weight:700; }
+    .suggestDivider{ height:1px; background: rgba(15,23,42,.06); }
+
+    /* AI personalization highlight */
+    .aiRow{
+      display:grid;
+      gap:10px;
+    }
+    .aiCard{
+      border-radius: 24px;
+      border:1px solid rgba(16,185,129,.18);
+      background:
+        radial-gradient(460px 160px at 20% 0%, rgba(16,185,129,.22), transparent 60%),
+        rgba(255,255,255,.55);
+      box-shadow: 0 16px 44px rgba(11,18,32,.10);
+      padding:14px;
+      position:relative;
+      overflow:hidden;
+    }
+    .aiBadge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      background: rgba(16,185,129,.12);
+      border:1px solid rgba(16,185,129,.22);
+      font-size:11px;
+      font-weight:850;
+      color:#0b3b2e;
+    }
+    .aiCard h3{
+      margin:10px 0 6px;
+      font-size:15px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .aiCard p{
+      margin:0;
+      color:var(--muted);
+      font-size:12.5px;
+      line-height:1.45;
+      font-weight:650;
+    }
+    .aiGrid{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .mini{
+      border-radius:18px;
+      padding:12px;
+      background: rgba(255,255,255,.62);
+      border:1px solid var(--stroke);
+      box-shadow: 0 10px 24px rgba(11,18,32,.06);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+    }
+    .mini strong{
+      display:block;
+      font-size:12px;
+      font-weight:900;
+    }
+    .mini small{
+      display:block;
+      margin-top:2px;
+      color:var(--muted);
+      font-size:11.5px;
+      font-weight:700;
+    }
+    .btn{
+      border:0;
+      cursor:pointer;
+      padding:10px 12px;
+      border-radius: 14px;
+      font-weight:900;
+      font-size:12px;
+      color:#071423;
+      background: linear-gradient(135deg, rgba(182,219,255,.75), rgba(191,245,230,.70));
+      box-shadow: 0 12px 30px rgba(11,18,32,.10);
+      border:1px solid rgba(255,255,255,.65);
+      transition: transform .2s var(--ease), filter .2s var(--ease);
+      white-space:nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); filter:saturate(1.05); }
+    .btn.secondary{
+      background: rgba(255,255,255,.68);
+      border:1px solid var(--stroke);
+      color:#0b1220;
+    }
+
+    /* Hospital overview */
+    .hTitle{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:12px;
+    }
+    .hTitle h3{
+      margin:0;
+      font-size:16px;
+      font-weight:930;
+      letter-spacing:.2px;
+    }
+    .hTitle .tag{
+      font-size:11px;
+      font-weight:900;
+      color:#0b3b2e;
+      background: rgba(191,245,230,.55);
+      border:1px solid rgba(16,185,129,.18);
+      padding:7px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    .mutedText{
+      margin:10px 0 0;
+      color:var(--muted);
+      font-size:12.5px;
+      line-height:1.55;
+      font-weight:650;
+    }
+
+    /* Leadership - horizontal cards */
+    .rowScroll{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+      overflow:auto hidden;
+      padding-bottom:6px;
+      scrollbar-width:none;
+    }
+    .rowScroll::-webkit-scrollbar{ display:none; }
+    .leader{
+      flex:0 0 auto;
+      width:240px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.60);
+      border:1px solid var(--stroke);
+      box-shadow: 0 12px 26px rgba(11,18,32,.08);
+      padding:12px;
+    }
+    .avatar{
+      width:46px;height:46px;border-radius:18px;
+      background: linear-gradient(145deg, rgba(182,219,255,.85), rgba(191,245,230,.85));
+      border:1px solid rgba(255,255,255,.65);
+      box-shadow: 0 12px 26px rgba(11,18,32,.10);
+      display:grid; place-items:center;
+      font-weight:950;
+      color:#0b1220;
+      margin-bottom:10px;
+    }
+    .leader b{ font-size:12.5px; font-weight:950; display:block; }
+    .leader span{ font-size:11.5px; font-weight:750; color:var(--muted); display:block; margin-top:2px; }
+
+    /* Details grid */
+    .grid2{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .kv{
+      border-radius: 18px;
+      background: rgba(255,255,255,.62);
+      border:1px solid var(--stroke);
+      box-shadow: 0 10px 24px rgba(11,18,32,.06);
+      padding:12px;
+    }
+    .kv b{ font-size:11px; font-weight:950; color:#10213a; display:block; }
+    .kv span{ margin-top:6px; display:block; font-size:12.5px; font-weight:800; }
+    .kv small{ display:block; margin-top:2px; color:var(--muted); font-size:11.5px; font-weight:700; }
+
+    /* Booking drawer */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(11,18,32,.36);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display:none;
+      z-index:50;
+    }
+    .overlay.show{ display:block; }
+    .drawer{
+      position:fixed;
+      left:50%; transform:translateX(-50%);
+      bottom:-100%;
+      width:min(430px, 96vw);
+      border-radius: 28px 28px 22px 22px;
+      background: rgba(255,255,255,.72);
+      border:1px solid rgba(255,255,255,.65);
+      box-shadow: 0 40px 120px rgba(11,18,32,.22);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding:14px 14px 16px;
+      z-index:60;
+      transition: bottom .52s var(--ease);
+      overflow:hidden;
+    }
+    .drawer.show{ bottom: 14px; }
+    .handle{
+      width:46px; height:5px; border-radius:999px;
+      background: rgba(11,18,32,.14);
+      margin: 0 auto 12px;
+    }
+    .dHead{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:12px;
+    }
+    .dHead h4{
+      margin:0;
+      font-size:14px;
+      font-weight:950;
+    }
+    .dHead p{
+      margin:5px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+      line-height:1.35;
+    }
+    .close{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.7);
+      border-radius: 14px;
+      width:38px; height:38px;
+      display:grid; place-items:center;
+      cursor:pointer;
+      box-shadow: 0 10px 22px rgba(11,18,32,.06);
+    }
+    .days{
+      margin-top:12px;
+      display:flex; gap:8px;
+      overflow:auto hidden;
+      scrollbar-width:none;
+      padding-bottom:4px;
+    }
+    .days::-webkit-scrollbar{ display:none; }
+    .day{
+      flex:0 0 auto;
+      min-width: 92px;
+      padding:10px 10px;
+      border-radius: 18px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.62);
+      cursor:pointer;
+      box-shadow: 0 10px 24px rgba(11,18,32,.06);
+      transition: transform .2s var(--ease), background .2s var(--ease);
+    }
+    .day:hover{ transform: translateY(-1px); }
+    .day.active{
+      background: linear-gradient(135deg, rgba(182,219,255,.65), rgba(191,245,230,.58));
+    }
+    .day b{ display:block; font-size:12px; font-weight:950; }
+    .day small{ display:block; margin-top:2px; color:var(--muted); font-size:11px; font-weight:750; }
+
+    .slots{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:8px;
+    }
+    .slot{
+      padding:10px 10px;
+      border-radius: 16px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.62);
+      box-shadow: 0 10px 24px rgba(11,18,32,.06);
+      cursor:pointer;
+      font-size:12px;
+      font-weight:900;
+      text-align:center;
+      user-select:none;
+      transition: transform .2s var(--ease), background .2s var(--ease), opacity .2s var(--ease);
+    }
+    .slot:hover{ transform: translateY(-1px); }
+    .slot.disabled{
+      opacity:.45;
+      cursor:not-allowed;
+    }
+    .slot.active{
+      background: linear-gradient(135deg, rgba(191,245,230,.70), rgba(182,219,255,.65));
+    }
+    .dFoot{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+    }
+    .dFoot .btn{ flex:1; padding:12px; border-radius: 18px; }
+
+    /* Toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      transform: translateX(-50%);
+      bottom: 22px;
+      width: min(430px, 92vw);
+      padding:12px 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.78);
+      border:1px solid rgba(16,185,129,.18);
+      box-shadow: 0 18px 50px rgba(11,18,32,.14);
+      display:none;
+      z-index:80;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      font-size:12.5px;
+      font-weight:850;
+      color:#0b3b2e;
+    }
+    .toast.show{ display:block; animation: pop .35s var(--ease) 1; }
+    @keyframes pop{
+      from{ transform: translateX(-50%) translateY(10px); opacity:.0; }
+      to{ transform: translateX(-50%) translateY(0); opacity:1; }
+    }
+
+    /* Accessibility helpers */
+    .sr-only{
+      position:absolute; width:1px; height:1px;
+      padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stage">
+    <main class="shell" aria-label="Premium healthcare landing page demo">
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="brand" aria-label="Brand">
+          <div class="logo" aria-hidden="true">
+            <!-- simple medical cross -->
+            <svg class="icon" viewBox="0 0 24 24" fill="none">
+              <path d="M12 4v16M4 12h16" stroke="#0B1220" stroke-width="2.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div style="min-width:0">
+            <h1>American Health Dubai</h1>
+            <span>Women & Children’s Campus</span>
+          </div>
+        </div>
+
+        <!-- Personalization chip (Salesforce-style signal) -->
+        <div class="pill" title="Personalized from CRM / booking history">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="welcomeChip">Welcome back, Fatima</span>
+        </div>
+      </header>
+
+      <!-- Nav -->
+      <nav class="nav" aria-label="Primary navigation">
+        <div class="tab active" data-tab="home">
+          <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z" stroke="#10213a" stroke-width="2" stroke-linejoin="round"/></svg>
+          Home
+        </div>
+        <div class="tab" data-tab="care">
+          <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.35-7-11a4 4 0 0 1 7-2.2A4 4 0 0 1 19 10c0 6.65-7 11-7 11Z" stroke="#10213a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Care
+        </div>
+        <div class="tab" data-tab="hospitals">
+          <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M4 21V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M9 21v-6h6v6" stroke="#10213a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 9h4M12 7v4" stroke="#10213a" stroke-width="2" stroke-linecap="round"/></svg>
+          Hospitals
+        </div>
+      </nav>
+
+      <!-- HERO -->
+      <section class="section">
+        <div class="hero card shimmer" data-reveal>
+          <h2>Welcome to Al Jalila Children’s Hospital</h2>
+          <p>
+            Compassionate, comprehensive care for children from birth through 18 — with all pediatric specialties under one roof.
+            Designed for faster journeys, smarter search, and simpler booking.
+          </p>
+          <div class="chips" aria-label="Quick actions">
+            <div class="chip">One-Click Booking <small>for return visits</small></div>
+            <div class="chip">Search that guides care <small>not pages</small></div>
+            <div class="chip">Arabic-ready <small>localised UX</small></div>
+          </div>
+
+          <!-- Search + AI highlight -->
+          <div class="searchWrap" aria-label="Search and booking">
+            <div class="searchBox" role="search">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" stroke="#10213a" stroke-width="2"/>
+                <path d="M20 20l-3.5-3.5" stroke="#10213a" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <input id="searchInput" autocomplete="off" placeholder="Search care… e.g., Pediatrician, Dermatology, Cardiac" />
+              <div class="kbd" aria-hidden="true">⌘K</div>
+
+              <div id="suggestBox" class="suggest" role="listbox" aria-label="Suggestions"></div>
+            </div>
+
+            <!-- AI “wow” card -->
+            <div class="aiRow">
+              <div class="aiCard card shimmer" data-reveal>
+                <div class="aiBadge">
+                  <span aria-hidden="true">✨</span>
+                  SitecoreAI + Salesforce signal
+                </div>
+                <h3 id="aiTitle">Personalized booking for Fatima</h3>
+                <p id="aiDesc">
+                  We recognise a return visit and prioritize the most likely care path —
+                  pre-selecting the clinic, suggested doctor, and a one-tap slot.
+                </p>
+
+                <div class="aiGrid" aria-label="Personalized recommendations">
+                  <div class="mini">
+                    <div>
+                      <strong id="recDoctor">Suggested: Dr. Hana Al-Nuaimi</strong>
+                      <small id="recMeta">Pediatrics · last visit 6 weeks ago · Al Jaddaf</small>
+                    </div>
+                    <button class="btn" id="oneClickBtn">One-Click Book</button>
+                  </div>
+
+                  <div class="mini">
+                    <div>
+                      <strong id="recAlt">Or: Search “Pediatrician”</strong>
+                      <small>Autocomplete + similar care suggestions</small>
+                    </div>
+                    <button class="btn secondary" id="viewResultsBtn">View options</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Hospital overview -->
+      <section class="section">
+        <div class="card shimmer" data-reveal>
+          <div class="hTitle">
+            <h3>360° Pediatric Expertise</h3>
+            <div class="tag">Family-friendly • Safe • Specialist</div>
+          </div>
+          <p class="mutedText">
+            We deliver expert care across multiple medical and surgical specialties — including Cardiac Care, Kidney Care and Transplantation,
+            Neurosciences, Dermatology, Pediatric Critical Care and Oncology, and Neonatology for newborn arrivals.
+            Advanced therapies are available closer to home, including a gene therapy program introduced in 2020.
+          </p>
+
+          <div class="rowScroll" aria-label="Leadership team">
+            <div class="leader">
+              <div class="avatar">AK</div>
+              <b>Dr. Abdulla Al Khayat</b>
+              <span>CEO Emeritus</span>
+            </div>
+            <div class="leader">
+              <div class="avatar">MA</div>
+              <b>Dr. Mohamed Al Awadhi</b>
+              <span>Executive Director – Women & Children</span>
+            </div>
+            <div class="leader">
+              <div class="avatar">IM</div>
+              <b>Dr. Ibrar Majid</b>
+              <span>Chair of Pediatrics & Medical Director</span>
+            </div>
+            <div class="leader">
+              <div class="avatar">YH</div>
+              <b>Yuser Hamad</b>
+              <span>Acting Nursing Director</span>
+            </div>
+          </div>
+
+          <div class="grid2" aria-label="Location and contact">
+            <div class="kv">
+              <b>Location</b>
+              <span>Al Jaddaf, Dubai</span>
+              <small>Easy access + parking</small>
+            </div>
+            <div class="kv">
+              <b>Contact</b>
+              <span>800 60</span>
+              <small>Emergency 24/7</small>
+            </div>
+            <div class="kv">
+              <b>Clinic hours</b>
+              <span>Sun–Thu</span>
+              <small>09:00 AM – 02:30 PM</small>
+            </div>
+            <div class="kv">
+              <b>Fast booking</b>
+              <span>New + return</span>
+              <small>One-click for known patients</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- footer spacing -->
+      <div style="height:14px"></div>
+    </main>
+  </div>
+
+  <!-- Booking Drawer -->
+  <div id="overlay" class="overlay" aria-hidden="true"></div>
+
+  <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-label="Booking drawer">
+    <div class="handle" aria-hidden="true"></div>
+
+    <div class="dHead">
+      <div>
+        <h4 id="drawerTitle">Book with Dr. Hana Al-Nuaimi</h4>
+        <p id="drawerMeta">Pediatrics · Return visit · prefilled details from CRM</p>
+      </div>
+      <button class="close" id="closeDrawer" aria-label="Close booking">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="#10213a" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="days" id="daysRow" aria-label="Choose a day"></div>
+    <div class="slots" id="slotsGrid" aria-label="Choose a time slot"></div>
+
+    <div class="dFoot">
+      <button class="btn secondary" id="changeDoctorBtn">Change doctor</button>
+      <button class="btn" id="confirmBtn" disabled>Confirm booking</button>
+    </div>
+  </aside>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // --- Demo data (replace with real Search/CRM/booking APIs) ---
+    const patient = {
+      name: "Fatima",
+      lastVisitWeeks: 6,
+      preferredDoctor: "Dr. Hana Al-Nuaimi",
+      preferredClinic: "Pediatrics",
+      location: "Al Jaddaf",
+      // Example of CRM-sourced hints:
+      language: "EN/AR",
+      returnVisit: true
+    };
+
+    const searchCatalog = [
+      { label: "Pediatrician", meta: "Care · Children’s health" },
+      { label: "Dermatology", meta: "Specialty · Skin & allergy" },
+      { label: "Neonatology", meta: "Specialty · Newborn care" },
+      { label: "Cardiac Care", meta: "Specialty · Pediatric cardiology" },
+      { label: "Kidney Care", meta: "Specialty · Nephrology & transplant" },
+      { label: "Neurosciences", meta: "Specialty · Neurology" },
+      { label: "Emergency", meta: "Service · 24/7" },
+      { label: "Vaccinations", meta: "Clinic · Immunizations" }
+    ];
+
+    // A tiny "AI" mapping: query -> best doctor suggestion
+    const doctorDirectory = {
+      "pediatrician": { name: patient.preferredDoctor, clinic: "Pediatrics", note: "Regular doctor (return visit)" },
+      "pediatrics": { name: patient.preferredDoctor, clinic: "Pediatrics", note: "Regular doctor (return visit)" },
+      "dermatology": { name: "Dr. Leila Hassan", clinic: "Dermatology", note: "Soonest availability" },
+      "cardiac care": { name: "Dr. Omar Al-Farsi", clinic: "Cardiac Care", note: "Recommended for symptoms pathway" }
+    };
+
+    // Booking slots (mock)
+    const slotDB = {
+      "Pediatrics": [
+        { day: "Today", date: nextDateLabel(0), times: ["09:30", "10:10", "11:20", "12:00", "13:10", "14:00"] },
+        { day: "Tomorrow", date: nextDateLabel(1), times: ["09:00", "09:40", "10:30", "11:10", "12:20", "13:30"] },
+        { day: "Wed", date: nextDateLabel(2), times: ["09:20", "10:00", "10:40", "11:50", "12:40", "13:20"] },
+        { day: "Thu", date: nextDateLabel(3), times: ["09:10", "09:50", "10:20", "11:00", "12:10", "13:00"] }
+      ],
+      "Dermatology": [
+        { day: "Today", date: nextDateLabel(0), times: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00"] },
+        { day: "Tomorrow", date: nextDateLabel(1), times: ["09:30", "10:30", "11:30", "12:30", "13:30", "14:30"] }
+      ],
+      "Cardiac Care": [
+        { day: "Tomorrow", date: nextDateLabel(1), times: ["10:20", "11:40", "13:10"] },
+        { day: "Thu", date: nextDateLabel(3), times: ["09:40", "12:10", "14:20"] }
+      ]
+    };
+
+    // --- Elements ---
+    const welcomeChip = document.getElementById("welcomeChip");
+    const searchInput = document.getElementById("searchInput");
+    const suggestBox = document.getElementById("suggestBox");
+
+    const aiTitle = document.getElementById("aiTitle");
+    const aiDesc = document.getElementById("aiDesc");
+    const recDoctor = document.getElementById("recDoctor");
+    const recMeta = document.getElementById("recMeta");
+    const oneClickBtn = document.getElementById("oneClickBtn");
+    const viewResultsBtn = document.getElementById("viewResultsBtn");
+
+    const overlay = document.getElementById("overlay");
+    const drawer = document.getElementById("drawer");
+    const closeDrawer = document.getElementById("closeDrawer");
+    const drawerTitle = document.getElementById("drawerTitle");
+    const drawerMeta = document.getElementById("drawerMeta");
+    const daysRow = document.getElementById("daysRow");
+    const slotsGrid = document.getElementById("slotsGrid");
+    const confirmBtn = document.getElementById("confirmBtn");
+    const changeDoctorBtn = document.getElementById("changeDoctorBtn");
+    const toast = document.getElementById("toast");
+
+    let state = {
+      selectedClinic: patient.preferredClinic,
+      selectedDoctor: patient.preferredDoctor,
+      selectedDayIndex: 0,
+      selectedTime: null
+    };
+
+    // --- Init personalization copy ---
+    welcomeChip.textContent = `Welcome back, ${patient.name}`;
+    refreshAIRecommendation();
+
+    // --- Search autocomplete ---
+    function renderSuggestions(items){
+      suggestBox.innerHTML = "";
+      if(!items.length){
+        const empty = document.createElement("div");
+        empty.className = "suggestItem";
+        empty.innerHTML = `<span>No results</span><span class="muted">Try “Pediatrician”</span>`;
+        suggestBox.appendChild(empty);
+        return;
+      }
+
+      items.slice(0,6).forEach((it, idx) => {
+        const row = document.createElement("div");
+        row.className = "suggestItem";
+        row.setAttribute("role","option");
+        row.innerHTML = `<div><b>${it.label}</b><div style="height:4px"></div><span>${it.meta}</span></div>
+                         <span class="muted">↵</span>`;
+        row.addEventListener("click", () => {
+          searchInput.value = it.label;
+          suggestBox.classList.remove("show");
+          applyQuery(it.label);
+        });
+        suggestBox.appendChild(row);
+        if(idx !== Math.min(items.length,6)-1){
+          const d = document.createElement("div");
+          d.className = "suggestDivider";
+          suggestBox.appendChild(d);
+        }
+      });
+    }
+
+    function filterCatalog(q){
+      const s = q.trim().toLowerCase();
+      if(!s) return [];
+      return searchCatalog.filter(x => x.label.toLowerCase().includes(s));
+    }
+
+    searchInput.addEventListener("input", () => {
+      const items = filterCatalog(searchInput.value);
+      if(items.length){
+        suggestBox.classList.add("show");
+        renderSuggestions(items);
+      }else{
+        // show box if user typed something, even if empty results
+        if(searchInput.value.trim()){
+          suggestBox.classList.add("show");
+          renderSuggestions([]);
+        }else{
+          suggestBox.classList.remove("show");
+        }
+      }
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter"){
+        e.preventDefault();
+        suggestBox.classList.remove("show");
+        applyQuery(searchInput.value);
+      }
+      if(e.key === "Escape"){
+        suggestBox.classList.remove("show");
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if(!suggestBox.contains(e.target) && e.target !== searchInput){
+        suggestBox.classList.remove("show");
+      }
+    });
+
+    // Cmd+K focus
+    document.addEventListener("keydown", (e) => {
+      if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){
+        e.preventDefault();
+        searchInput.focus();
+        suggestBox.classList.add("show");
+        renderSuggestions(filterCatalog(searchInput.value || "p"));
+      }
+    });
+
+    // --- Apply query -> update AI recommendation ---
+    function applyQuery(query){
+      const q = (query || "").trim();
+      if(!q) return;
+
+      // simulate: SitecoreAI uses intent + Salesforce history to bias suggestion
+      const key = q.toLowerCase();
+      let rec = doctorDirectory[key] || doctorDirectory["pediatrician"];
+
+      // If the query is "Pediatrician" and we know the patient, bias to regular doctor
+      if(key.includes("pediatric") && patient.returnVisit){
+        rec = doctorDirectory["pediatrician"];
+      }
+
+      state.selectedClinic = rec.clinic;
+      state.selectedDoctor = rec.name;
+
+      // Update the “wow” card
+      recDoctor.textContent = `Suggested: ${rec.name}`;
+      recMeta.textContent = `${rec.clinic} · ${rec.note} · ${patient.location}`;
+      aiTitle.textContent = `Personalized booking for ${patient.name}`;
+      aiDesc.textContent =
+        `Based on prior visits and intent (“${q}”), we pre-select the most likely doctor and offer a one-tap slot.`;
+
+      // light feedback
+      showToast(`Updated recommendation: ${rec.name} (${rec.clinic})`);
+    }
+
+    function refreshAIRecommendation(){
+      recDoctor.textContent = `Suggested: ${patient.preferredDoctor}`;
+      recMeta.textContent = `${patient.preferredClinic} · last visit ${patient.lastVisitWeeks} weeks ago · ${patient.location}`;
+    }
+
+    // --- Booking drawer ---
+    function openDrawer(){
+      drawerTitle.textContent = `Book with ${state.selectedDoctor}`;
+      drawerMeta.textContent = `${state.selectedClinic} · ${patient.returnVisit ? "Return visit" : "New visit"} · prefilled details from CRM`;
+      overlay.classList.add("show");
+      drawer.classList.add("show");
+      overlay.setAttribute("aria-hidden","false");
+      document.body.style.overflow = "hidden";
+
+      buildDays();
+      selectDay(0);
+      confirmBtn.disabled = true;
+      state.selectedTime = null;
+    }
+
+    function closeDrawerFn(){
+      overlay.classList.remove("show");
+      drawer.classList.remove("show");
+      overlay.setAttribute("aria-hidden","true");
+      document.body.style.overflow = "";
+    }
+
+    function buildDays(){
+      daysRow.innerHTML = "";
+      const days = slotDB[state.selectedClinic] || slotDB["Pediatrics"];
+      days.forEach((d, i) => {
+        const el = document.createElement("div");
+        el.className = "day" + (i===0 ? " active" : "");
+        el.innerHTML = `<b>${d.day}</b><small>${d.date}</small>`;
+        el.addEventListener("click", () => selectDay(i));
+        daysRow.appendChild(el);
+      });
+    }
+
+    function selectDay(i){
+      state.selectedDayIndex = i;
+      [...daysRow.children].forEach((c, idx) => c.classList.toggle("active", idx===i));
+
+      const days = slotDB[state.selectedClinic] || slotDB["Pediatrics"];
+      const day = days[i] || days[0];
+
+      slotsGrid.innerHTML = "";
+      const times = (day?.times || []);
+      // simulate some disabled slots
+      const disabledIdx = new Set([1, 4].filter(x => x < times.length));
+
+      times.forEach((t, idx) => {
+        const el = document.createElement("div");
+        el.className = "slot" + (disabledIdx.has(idx) ? " disabled" : "");
+        el.textContent = t;
+
+        el.addEventListener("click", () => {
+          if(el.classList.contains("disabled")) return;
+
+          [...slotsGrid.children].forEach(s => s.classList.remove("active"));
+          el.classList.add("active");
+          state.selectedTime = t;
+          confirmBtn.disabled = false;
+        });
+
+        slotsGrid.appendChild(el);
+      });
+
+      // reset selection on day change
+      state.selectedTime = null;
+      confirmBtn.disabled = true;
+    }
+
+    // Buttons
+    oneClickBtn.addEventListener("click", () => openDrawer());
+    viewResultsBtn.addEventListener("click", () => {
+      applyQuery("Pediatrician");
+      openDrawer();
+    });
+
+    closeDrawer.addEventListener("click", closeDrawerFn);
+    overlay.addEventListener("click", closeDrawerFn);
+
+    changeDoctorBtn.addEventListener("click", () => {
+      showToast("Demo: open doctor list / search results");
+      // In a real build: route to search results list and re-select.
+      searchInput.focus();
+      closeDrawerFn();
+    });
+
+    confirmBtn.addEventListener("click", () => {
+      if(!state.selectedTime) return;
+
+      const days = slotDB[state.selectedClinic] || slotDB["Pediatrics"];
+      const day = days[state.selectedDayIndex] || days[0];
+
+      // Mock “booking created” + “CRM follow-up”
+      closeDrawerFn();
+      showToast(`Booked ${state.selectedClinic} with ${state.selectedDoctor} — ${day.day} at ${state.selectedTime}. Follow-up created in CRM.`);
+    });
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    function nextDateLabel(offset){
+      const d = new Date();
+      d.setDate(d.getDate() + offset);
+      const opts = { month:"short", day:"numeric" };
+      return d.toLocaleDateString(undefined, opts);
+    }
+
+    // --- “fade in + shimmer” on reveal ---
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if(e.isIntersecting){
+          e.target.classList.add("in");
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll("[data-reveal]").forEach(el => io.observe(el));
+  </script>
+</body>
+</html>
